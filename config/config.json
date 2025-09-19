@@ -1,0 +1,70 @@
+{
+  "radius_qc": {
+    "io": {
+      "input_dir": "D:\\Desktop\\SWC Output\\orphan_cleaned",
+      "output_dir": "D:\\Desktop\\SWC Output\\radius_modified",
+      "log_csv": "radius_changes_percentile.csv",
+      "log_summary": "files_changed_summary.csv",
+      "pattern": "*.swc",
+      "recursive": false
+    },
+    "compute": { "workers": 4 },
+    "thresholds": { "p_low": 0, "p_high": 90, "min_per_type_count": 20 },
+    "neighbors": { "depth": 1, "neighbor_max": 16 },
+    "policy": { "skip_soma_changes": true, "eps_min_radius": 1e-9 }
+  },
+
+  "orphan_clean": {
+    "io": {
+      "input_dir": "D:\\Desktop\\Projectome SWC Files",
+      "output_dir": "D:\\Desktop\\SWC Output\\orphan_cleaned",
+      "log_csv": "swc_changes.csv",
+      "pattern": "*.swc",
+      "recursive": false
+    },
+    "reconnect": {
+      "shift_accept_mad": 5.0
+    }
+  },
+
+  "dendrograms": {
+    "io": {
+      "input_dir": "D:\\Desktop\\SWC Output\\orphan_cleaned",
+      "output_dir": "D:\\Desktop\\SWC Output\\dendrograms",
+      "pattern": "*.swc",
+      "recursive": false,
+      "log_csv": "dendrogram_errors.csv"
+    },
+    "draw": {
+      "show_diameters": true,
+      "width": 20.0,
+      "height": 25.0,
+      "dpi": 300,
+      "line_width": 1.4
+    },
+
+    "colors": {
+      "soma": "#808080",
+      "axon": "#d62728",
+      "basal_dendrite": "#2ca02c",
+      "apical_dendrite": "#1f77b4",
+      "undefined": "#9467bd",
+      "custom": "#ff7f00"
+    },
+    "min_nodes_per_type": 2
+  },
+  "violin_metrics": {
+    "io": {
+      "xlsx": "D:\\Desktop\\Projectome SWC Files\\SUB_CellTypes.xlsx",
+      "swc_dir": "D:\\Desktop\\SWC Output\\radius_modified",
+      "out_dir": "D:\\Desktop\\SWC Output\\violin_plots_readius_qc",
+      "stats_csv": "violin_summary_stats.csv"
+    },
+    "plot": { "width": 28, "height": 15, "dpi": 300, "mean_color": "#ff7f0e" },
+    "sample": { "swc_id": null },
+    "debug": {
+      "verbose": true,
+      "limit_per_type": null
+    }
+  }
+}

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "swctools"
+version = "0.1.0"
+description = "SWC utilities: radius QC and morphology tools"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy",
+  "pandas",
+  "scipy",
+  "matplotlib",
+  "neurom",
+  "morphio",
+  "neurom>=4.0.4",
+  "matplotlib>=3.6",
+  "cycler>=0.11",
+  "numpy>=1.23"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+swc-radius-qc   = "swctools.radius_qc:cli_main"
+swc-clean-orphans = "swctools.orphans:cli_main"
+swc-dendrograms  = "swctools.dendrograms:cli_main"
+swc-violin-metrics = "swctools.violin_plots:cli_main"
