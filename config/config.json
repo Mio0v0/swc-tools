@@ -57,7 +57,7 @@
     "io": {
       "xlsx": "D:\\Desktop\\Projectome SWC Files\\SUB_CellTypes.xlsx",
       "swc_dir": "D:\\Desktop\\SWC Output\\radius_modified",
-      "out_dir": "D:\\Desktop\\SWC Output\\violin_plots_readius_qc",
+      "out_dir": "D:\\Desktop\\SWC Output\\violin_plots",
       "stats_csv": "violin_summary_stats.csv"
     },
     "plot": { "width": 28, "height": 15, "dpi": 300, "mean_color": "#ff7f0e" },
