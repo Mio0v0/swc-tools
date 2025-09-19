@@ -26,7 +26,6 @@ def euclid3(ax, ay, az, bx, by, bz) -> float:
     dx=ax-bx; dy=ay-by; dz=az-bz
     return float(np.sqrt(dx*dx+dy*dy+dz*dz))
 
-# src/swctools/stats.py
 def edge_lengths_in_component(arr: np.ndarray, comp_indices: List[int]) -> np.ndarray:
     id2idx = id_to_index_map(arr)
     comp = set(comp_indices)

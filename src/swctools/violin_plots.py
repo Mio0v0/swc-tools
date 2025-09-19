@@ -13,7 +13,7 @@ from .metrics import (
     TYPE_COLORS,
 )
 
-# Which scalar metrics to plot (order = file name order)
+
 METRIC_KEYS = [
     "n_nodes",
     "n_bifurcations",
@@ -220,7 +220,7 @@ def process_dir(cfg: Dict[str, Any]):
         else:
             print(f"⚠️ {metric} skipped: {err}", flush=True)
 
-    # --- NEW: one summary CSV with per-type stats for each metric ---
+    # --- one summary CSV with per-type stats for each metric ---
     stats_path = os.path.join(out_dir, stats_csv)
     with open(stats_path, "w", newline="", encoding="utf-8") as f:
         fields = [

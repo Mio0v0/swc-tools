@@ -1,30 +1,54 @@
-# File Description
+# SWC Tools
 
-swctools/io.py – Robust SWC I/O: safely parse an SWC into a structured NumPy array (preserving original numeric strings) and write it back unchanged except for edits.
+A small toolkit for cleaning and analyzing neuron morphologies in **SWC** format.
 
-swctools/graph.py – Graph helpers for SWC trees: parent/child maps, adjacency, neighbor sets, connected components, and subtree extraction.
+---
 
-swctools/stats.py – Numeric utilities: per-type radius percentiles/means, 3D distances, component edge lengths, and a robust MAD/percentile threshold.
+## Contents (what each file does)
 
-swctools/orphans.py – Cleans extra roots (“orphans”): merge duplicates, reconnect (with optional rigid shift), or split subtrees; writes the cleaned SWCs plus a unified node-level change log (orphan_changes_all.csv) and a file-level summary.
+- `swctools/io.py` – **Robust SWC I/O.** Safely parses an SWC into a structured NumPy array (preserving original numeric strings) and writes it back unchanged except for your edits.
 
-swctools/radius-qc.py – Flags outlier radii per SWC type using percentile thresholds, repairs them via local neighbor/type means, and records all adjustments to CSV.
+- `swctools/graph.py` – **Tree helpers.** Parent/child maps, adjacency, neighbor sets, connected components, and subtree extraction for SWC trees.
 
-swctools/dendrograms.py – Renders per-neuron dendrograms (SVG) with segments colored by SWC type (0..4 fixed, ≥5 custom); X-axis = path length from soma.
+- `swctools/stats.py` – **Numeric utilities.** Per-type radius percentiles/means, 3D distances, component edge lengths, and a robust MAD/percentile threshold.
 
-# How to Run
+- `swctools/orphans.py` – **Clean extra roots (“orphans”).** Merges exact duplicates, reconnects to soma (optionally after a rigid shift), or splits subtrees. Writes:
+  - cleaned SWCs
+  - **node-level change log**: `orphan_changes_all.csv`
+  - **file-level summary** CSV
 
-.\venv\Scripts\python.exe -m pip install -e .
+- `swctools/radius_qc.py` – **Radius quality control.** Flags outlier radii per SWC node **by SWC type** using percentile thresholds; repairs using local neighbor/type means; logs node-level adjustments to CSV.
 
-## Clean orphans / extra roots
-swc-clean-orphans --config D:\Desktop\SWC\config\config.json
+- `swctools/dendrograms.py` – **Dendrogram renderer (SVG).** Per-neuron dendrograms with segments colored by SWC type:
+  - `0` = undefined
+  - `1` = soma
+  - `2` = axon
+  - `3` = (basal) dendrite
+  - `4` = apical dendrite
+  - `5+` = custom  
+  *X-axis = path length from soma.*
 
-## or run the radius QC pass
-swc-radius-qc --config D:\Desktop\SWC\config\config.json
+- `swctools/metrics.py` + `swctools/violin_plots.py` – **Metrics & violin plots.** Computes per-neuron metrics and draws SVG violin plots per metric across five neuron types listed in an Excel mapping (see below). Overlays each SWC as a jittered point; optional sample SWC highlight.
 
-## create denfrogram
-swc-dendrograms --config D:\Desktop\SWC\config\config.json
+---
 
-## create violin plots
-swc-violin-metrics --config D:\Desktop\SWC\config\config.json
+## Prerequisites
+
+- **Python 3.9+**
+- A virtual environment is recommended.
+
+---
+
+## Install (editable)
+
+From the project root (the folder that contains `pyproject.toml`):
+
+```bash
+# Windows PowerShell
+python -m venv .\venv
+.\venv\Scripts\activate
+
+python -m pip install -U pip
+python -m pip install -e .
+
 

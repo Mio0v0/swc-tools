@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
 from .config import load_section
-from .io import read_swc_file  # your robust SWC reader
+from .io import read_swc_file
 
 # --------------------------- coloring -----------------------------
 
