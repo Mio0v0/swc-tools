@@ -51,4 +51,8 @@ python -m venv .\venv
 python -m pip install -U pip
 python -m pip install -e .
 
-
+swc-clean-orphans --config D:\Desktop\SWC\config\config.json  
+swc-radius-qc --config D:\Desktop\SWC\config\config.json     
+swc-violin-metrics --config D:\Desktop\SWC\config\config.json --section violin_metrics  
+swc-dendrograms --config D:\Desktop\SWC\config\config.json 
+swc-analysis --config D:\Desktop\SWC\config\config.json --section metrics

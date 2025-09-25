@@ -34,7 +34,16 @@ DEFAULTS = {
     "plot": {"width": 8.5,"height": 4.5,"dpi": 150,"jitter": 0.06,"point_alpha": 0.6,
             "point_edge": "#000000","point_size": 18.0},
     "sample": {"swc_id": None}
-  }
+  },
+    "metrics": {
+        "feature_file": "",
+        "excel_file": "",
+        "output_dir": "analysis_out",
+        "neuron_types": ["SUBdd", "ProSub", "SUBv", "SUBvv", "SUBdv"],
+        "colors": {"SUBdd": "#1f77b4",  "ProSub": "#ff7f0e", "SUBv": "#2ca02c", "SUBvv": "#d62728", "SUBdv": "#9467bd"},
+        "plot": {"width": 8, "height": 6, "dpi": 300, "format": "svg"},
+        "features": None
+    }
 }
 
 def _deep_merge(a,b):
@@ -94,6 +103,11 @@ def load_section(config_path: str, section: str):
         io["swc_dir"] = _resolve(base_dir, io["swc_dir"])
         io["out_dir"] = _resolve(base_dir, io["out_dir"])
         io["log_csv"] = _resolve(io["out_dir"], io["log_csv"])
+    elif section == "metrics":
+        cfg["feature_file"] = _resolve(base_dir, cfg["feature_file"])
+        cfg["excel_file"]   = _resolve(base_dir, cfg["excel_file"])
+        cfg["output_dir"]   = _resolve(base_dir, cfg["output_dir"])
+        os.makedirs(cfg["output_dir"], exist_ok=True)
     else:
         raise ValueError(f"Unknown section: {section}")
     return cfg

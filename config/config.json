@@ -66,5 +66,39 @@
       "verbose": true,
       "limit_per_type": null
     }
+  },
+  "metrics": {
+    "feature_file": "D:/Desktop/SWC Output/partial_features.json",
+    "excel_file": "D:/Desktop/Projectome SWC Files/SUB_CellTypes.xlsx",
+    "output_dir": "D:/Desktop/SWC Output/analysis",
+    "neuron_types": ["SUBdd", "ProSub", "SUBv", "SUBvv", "SUBdv"],
+    "colors": {
+      "SUBdd": "#1f77b4",
+      "ProSub": "#ff7f0e",
+      "SUBv": "#2ca02c",
+      "SUBvv": "#d62728",
+      "SUBdv": "#9467bd"
+    },
+    "plot": {
+      "width": 8,
+      "height": 6,
+      "dpi": 300,
+      "format": "svg"
+    },
+    "features": [
+      "aspect_ratio",
+      "circularity",
+      "length_fraction_above_soma",
+      "max_radial_distance",
+      "shape_factor",
+      "soma_radius",
+      "total_area_per_neurite",
+      "total_depth",
+      "total_height",
+      "total_length_per_neurite",
+      "total_volume_per_neurite",
+      "total_width",
+      "volume_density"
+    ]
   }
 }
