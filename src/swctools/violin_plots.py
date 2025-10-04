@@ -146,10 +146,12 @@ def _draw_one_violin(metric: str,
                            linewidths=1.0, zorder=6, label=f"sample {sample_id}")
                 ax.legend(frameon=False, loc='best')
 
+
     ax.set_xticks(positions)
-    ax.set_xticklabels(types)
-    ax.set_title(metric.replace("_", " ").title())
-    ax.set_ylabel(metric)
+    ax.set_xticklabels(types, fontsize=14, fontweight="bold")  # x labels bigger + bold
+    ax.set_title(metric.replace("_", " ").title(), fontsize=18, fontweight="bold", pad=15)
+    ax.set_ylabel(metric, fontsize=16, fontweight="bold")
+    ax.tick_params(axis="both", labelsize=14, width=2)  # make tick labels larger + ticks thicker
     fig.tight_layout()
 
     os.makedirs(os.path.dirname(out_svg), exist_ok=True)

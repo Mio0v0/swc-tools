@@ -56,7 +56,7 @@
   "violin_metrics": {
     "io": {
       "xlsx": "D:\\Desktop\\Projectome SWC Files\\SUB_CellTypes.xlsx",
-      "swc_dir": "D:\\Desktop\\SWC Output\\radius_modified",
+      "swc_dir": "D:\\Desktop\\Projectome SWC Files",
       "out_dir": "D:\\Desktop\\SWC Output\\violin_plots",
       "stats_csv": "violin_summary_stats.csv"
     },

@@ -49,13 +49,20 @@ def process_metrics(cfg):
 
     data = pd.DataFrame(rows)
 
-    # --- Ensure all feature cols are numeric ---
+    # Ensure all feature cols are numeric
     for feat in features:
         data[feat] = pd.to_numeric(data[feat], errors="coerce")
 
     # --- Save descriptive stats ---
     desc = data.groupby("type")[features].agg(["mean", "median", "std"])
-    desc.to_csv(os.path.join(out_dir, "descriptive_stats.csv"))
+
+    out_file = os.path.join(out_dir, "descriptive_stats.csv")
+    with open(out_file, "w") as f:
+        for feat in features:
+            f.write(f"Feature: {feat}\n")
+            desc_feat = desc[feat].reset_index()  # table for this feature only
+            desc_feat.to_csv(f, index=False)
+            f.write("\n")  # blank line between tables
 
     # --- ANOVA for each feature ---
     anova_results = {}
@@ -98,23 +105,22 @@ def process_metrics(cfg):
 
     for i, feat in enumerate(features):
         ax = axes[i]
-        sns.violinplot(x="type", y=feat, hue="type", data=data, palette=colors, ax=ax, legend=False)
-        sns.stripplot(x="type", y=feat, hue="type", data=data, palette=colors,
-                      size=3, jitter=0.25, alpha=0.6, ax=ax, dodge=False, legend=False)
-
-        ax.set_title(feat, fontsize=10)
+        sns.violinplot(x="type", y=feat, hue="type", data=data, palette=colors, ax=ax, legend=False, cut=0)
+        ax.set_title(feat, fontsize=18, fontweight="bold")
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+        ax.tick_params(axis="both", labelsize=16)  # tick labels
 
     # Hide any unused subplots
     for j in range(i + 1, len(axes)):
         fig.delaxes(axes[j])
 
-    plt.tight_layout()
+    plt.tight_layout(h_pad=3)
     plt.savefig(os.path.join(out_dir, "violin_all_features.svg"), dpi=cfg["plot"]["dpi"])
     plt.close()
 
-    # Radar plot (per type mean values)
+    # --- Radar plot (per type mean values) ---
     means = desc.xs("mean", level=1, axis=1)  # mean values per feature
-
     # scale each feature across types to 0–1
     scaler = MinMaxScaler()
     scaled_values = scaler.fit_transform(means.values)
@@ -123,52 +129,89 @@ def process_metrics(cfg):
     angles = np.linspace(0, 2 * np.pi, len(features_norm), endpoint=False).tolist()
     angles += angles[:1]  # close the circle
 
-    plt.figure(figsize=(20, 20))
+    plt.figure(figsize=(18, 18))
     ax = plt.subplot(111, polar=True)
     for i, t in enumerate(neuron_types):
         vals = scaled_values[i].tolist()
         vals += vals[:1]  # close the polygon
-        ax.plot(angles, vals, label=t, color=colors[t], linewidth=3)
+        ax.plot(angles, vals, label=t, color=colors[t], linewidth=3.5, alpha=0.75, marker="o")
 
+    # Feature labels around circle
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(features_norm, fontsize=8)
-    plt.legend()
-    plt.title("Radar Plot (Mean Feature Values, normalized 0–1)")
-    plt.savefig(os.path.join(out_dir, "radar_plot.svg"), dpi=cfg["plot"]["dpi"])
+    ax.set_xticklabels(features_norm, fontsize=20, fontweight="bold")
+
+    for label, angle in zip(ax.get_xticklabels(), angles[:-1]):
+        x, y = label.get_position()  # current position
+        label.set_position((x, y - 0.1))  # push outward
+        label.set_rotation(np.degrees(angle))
+        label.set_rotation_mode("anchor")
+
+    ax.tick_params(axis="y", labelsize=18)
+    plt.legend(fontsize=24, loc="upper right", bbox_to_anchor=(1.2, 1.1))
+    plt.title("Radar Plot (Mean Feature Values, normalized 0–1)",
+              fontsize=28, fontweight="bold", pad=150)
+    plt.savefig(os.path.join(out_dir, "radar_plot.svg"),
+                dpi=cfg["plot"]["dpi"], bbox_inches="tight")
     plt.close()
 
-    # Scatter matrix
+    # --- Scatter matrix ---
+    sns.set_context("notebook", font_scale=1) # scale all labels & ticks bigger
     sns.pairplot(data[features + ["type"]], hue="type", palette=colors)
     plt.savefig(os.path.join(out_dir, "scatter_matrix.svg"), dpi=cfg["plot"]["dpi"])
     plt.close()
 
     # --- Scatter plots (all features in one canvas) ---
     n_feats = len(features)
-    n_cols = 3  # you can change depending on how many plots per row
+    n_cols = 3
     n_rows = int(np.ceil(n_feats / n_cols))
 
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(cfg["plot"]["width"] * n_cols, cfg["plot"]["height"] * n_rows))
+    fig, axes = plt.subplots(
+        n_rows, n_cols,
+        figsize=(cfg["plot"]["width"] * n_cols, cfg["plot"]["height"] * n_rows)
+    )
     axes = axes.flatten()
 
-    for i, feat in enumerate(features):
+    # Use the first subplot only to get legend handles
+    ax0 = axes[0]
+    sns.scatterplot(
+        x=features[0], y="cell_id", hue="type", data=data, palette=colors,
+        s=30, alpha=0.7, ax=ax0  # keep legend=True so we can extract handles
+    )
+
+    # Extract handles/labels for global legend
+    handles, labels = ax0.get_legend_handles_labels()
+    ax0.legend_.remove()  # remove local legend
+    ax0.set_ylabel("")  # remove y-axis label
+    ax0.set_yticks([])  # remove ticks
+    ax0.set_xlabel("")  # remove x-axis label
+    ax0.set_title(features[0], fontsize=16, fontweight="bold")
+
+    # Plot remaining features (without legends)
+    for i, feat in enumerate(features[1:], start=1):
         ax = axes[i]
         sns.scatterplot(
-            x=feat, y="cell_id", hue="type", data=data, palette=colors, s=30, alpha=0.7, ax=ax
+            x=feat, y="cell_id", hue="type", data=data, palette=colors,
+            s=30, alpha=0.7, ax=ax, legend=False
         )
-        ax.set_yticks([])  # hide x labels since they’re just IDs
-        ax.set_xlabel(feat)
-        ax.set_ylabel("Sample ID")
-        ax.set_title(feat, fontsize=10)
+        ax.set_yticks([])
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+        ax.set_title(feat, fontsize=16, fontweight="bold")
 
-    # Hide any unused subplots
+    # Hide unused subplots
     for j in range(i + 1, len(axes)):
         fig.delaxes(axes[j])
 
+    # Add one global legend (outside figure, right side)
+    fig.legend(handles, labels, loc="upper right", fontsize=16,
+               title="Type", title_fontsize=18, bbox_to_anchor=(1.1, 1))
+
     plt.tight_layout()
-    plt.savefig(os.path.join(out_dir, "scatter_all_features.svg"), dpi=cfg["plot"]["dpi"])
+    plt.savefig(os.path.join(out_dir, "scatter_all_features.svg"),
+                dpi=cfg["plot"]["dpi"], bbox_inches="tight")
     plt.close()
 
-    # Heatmap of mean feature values
+    # --- Heatmap of mean feature values ---
     vmin, vmax = 1e-1, 1e7  # 10^-1 to 10^7
 
     plt.figure(figsize=(12, 6))
@@ -191,15 +234,6 @@ def process_metrics(cfg):
     plt.savefig(os.path.join(out_dir, "heatmap_means_log.svg"), dpi=cfg["plot"]["dpi"])
     plt.close()
 
-    # --- Clustering (KMeans) ---
-    X = data[features].dropna().values
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-    km = KMeans(n_clusters=5, random_state=42).fit(X_scaled)
-    labels = km.labels_
-    sil = silhouette_score(X_scaled, labels)
-    with open(os.path.join(out_dir, "clustering_results.json"), "w") as f:
-        json.dump({"silhouette_score": sil}, f, indent=2)
 
     print(f"✔ Analysis complete. Results in {out_dir}")
 

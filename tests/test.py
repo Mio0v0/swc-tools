@@ -1,21 +1,42 @@
 '''
 NeuroM Checkers
 '''
+import os
+import json
+import tempfile
+import pandas as pd
 import morphio
 from neurom.core import Morphology
 from neurom.check import morphology_checks as checks
-import json
 
 morphio.set_maximum_warnings(1)
 
-raw = morphio.Morphology(
-    "D:/Desktop/SWC_Fixed/200783_024.swc",
-    options=morphio.Option.allow_unifurcated_section_change
+# Path to input file
+in_path = r"D:\Desktop\Projectome SWC Files\202269_092.swc"
+
+# --- Step 1: Load SWC into DataFrame
+df = pd.read_csv(
+    in_path,
+    delim_whitespace=True,
+    comment="#",
+    names=["id", "type", "x", "y", "z", "radius", "parent"]
 )
 
+# --- Step 2: Replace type=0 or type>7 with 7
+df.loc[(df["type"] == 0) | (df["type"] > 7), "type"] = 7
+
+# --- Step 3: Write to a temporary SWC file
+tmp_fd, tmp_path = tempfile.mkstemp(suffix=".swc")
+os.close(tmp_fd)  # close low-level handle
+df.to_csv(tmp_path, sep=" ", index=False, header=False)
+
+# --- Step 4: Run NeuroM checks
+raw = morphio.Morphology(
+    tmp_path,
+    options=morphio.Option.allow_unifurcated_section_change
+)
 morph = Morphology(raw)
 
-# 2. Run all check functions starting with 'has_'
 results = {}
 for name in dir(checks):
     if name.startswith("has_"):
@@ -29,11 +50,16 @@ for name in dir(checks):
             except Exception as e:
                 results[name] = f"ERROR: {e}"
 
-# 3. Save results
-with open("D:/Desktop/SWC/summary.json", "w") as f:
+# --- Step 5: Save results
+out_path = r"D:/Desktop/SWC Output/summary.json"
+with open(out_path, "w") as f:
     json.dump(results, f, indent=2)
 
-print("Checks finished → results saved to summary.json")
+print(f"✔ Checks finished → results saved to {out_path}")
+
+# --- Step 6: Clean up temporary file
+os.remove(tmp_path)
+
 
 '''
 Plots
@@ -54,11 +80,6 @@ plot_dendrogram(morph, ax=ax)   # ensure it draws on your custom axes
 fig.tight_layout()
 plt.savefig("..._dendrogram.png", dpi=300)
 plt.close('all')
-
-import neurom
-from neurom import features
-m = neurom.load_morphology("tests/data/swc/Neuron.swc")
-result = features.get('soma_surface_area', m)
 
 '''
 Stats
